@@ -80,7 +80,7 @@ async def add(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 
 async def hello(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Echo the user message."""
+    """Say hello."""
     await update.message.reply_text("Good day, "+context.args[0]+"!")
 
 
