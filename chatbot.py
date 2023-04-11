@@ -36,7 +36,11 @@ import redis
 from telegram import ForceReply, Update
 from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandler, filters
 
+import openai
+import requests
+
 global redis1
+openaiURL = "https://api.openai.com/v1/chat/completions"
 
 # Enable logging
 logging.basicConfig(
@@ -84,6 +88,13 @@ async def hello(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.reply_text("Good day, "+context.args[0]+"!")
 
 
+async def openaiChat(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    "chat with gpt"
+    content = update.message.text
+    completion = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=[{"role": "user", "content": content}])
+    await update.message.reply_text(completion.choices[0].message.content)
+
+
 def main() -> None:
     """Start the bot."""
     config = configparser.ConfigParser()
@@ -107,8 +118,11 @@ def main() -> None:
     application.add_handler(CommandHandler("hello", hello))
 
     # on non command i.e message - echo the message on Telegram
-    application.add_handler(MessageHandler(
-        filters.TEXT & ~filters.COMMAND, echo))
+    # application.add_handler(MessageHandler(
+    #     filters.TEXT & ~filters.COMMAND, echo))
+
+    openai.api_key = config['OPENAI']['APIKEY']
+    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, openaiChat))
 
     # Run the bot until the user presses Ctrl-C
     application.run_polling()
